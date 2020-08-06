@@ -7,11 +7,10 @@ import pandas as pd
 from multiprocessing import Pool
 
 from newspaper.article import Article, ArticleDownloadState
-from ibm_watson import NaturalLanguageUnderstandingV1, DiscoveryV1
+from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_watson.natural_language_understanding_v1 import (
     Features,
     MetadataOptions,
-    SyntaxOptions,
 )
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
@@ -37,7 +36,7 @@ def load_urls(file_: Path = ARTICLES_LIST) -> T.List[T.List[str]]:
     Returns: list with GUID and URL
     """
     with open(file_, "rb") as f:
-        df = pd.read_excel(f, nrows=17486)
+        df = pd.read_excel(f)
     print("Loaded {} urls".format(df.shape[0]))
     return df[["GUID", "URL"]].values.tolist()
 
@@ -49,7 +48,9 @@ class Scraper:
 
     def get_all_articles_and_images(self, urls: T.List[T.List[str]]) -> None:
         pool_size = max(1, len(urls) // 300)
-        logger.info(f"Using {pool_size} parallel workers.")
+        # Uncomment three lines below(and comment *out* the following line)
+        # to enable multiprocessing.
+        # logger.info(f"Using {pool_size} parallel workers.")
         # with Pool(pool_size) as p:
         # result = p.map(self.get_article_and_image, urls)
         result = list(map(self.get_article_and_image, urls))
